@@ -1,0 +1,13 @@
+공개키 저장소를 안쓰는방법
+검증을 어디서 해야하는가 : universal resolver
+
+capability : 만료기간, universal resolver 이전에 검증 단계 필요
+
+영지식 증명
+
+node.js cache library 보고 universal resolver 지원 여부 확인
+이지환 학생과 돌아가면서 보시는 것도 좋을 것 같네요
+
+git에다가 공격 자동으로 돌리는 script
+다른 학생이 보고 와서 돌려볼수있도록 만들어봐야함
+그림이나 설명 거기다가 update하기

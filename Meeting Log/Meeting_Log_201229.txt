@@ -1,0 +1,22 @@
+1. uni-resolver가 나쁜놈인가?
+드라이버가 정보를 수집할 수 있음
+docker security configuration에 대해서도 얘기해볼 수 있을 것 같음
+
+2. 악성 device driver를 어떻게 막을 수 있는가
+지금 올라와 있는 드라이버들은 어떤 취약한 설정이 되어 있는가
+least previlege principle => 드라이버에 최소한의 권한을 줘야하는데
+드라이버가 정보를 수집해 전달할수도 있고 도커상에서 어떤파일에도 write하지 못하게 만드는 방법도 있고..
+두가지-> 1. sgx 2. 권한축소로 악용여지 없애기
+이 둘이 device driver에 중요한 것 같습니다.
+
+3. overleaf Outline 업데이트하기
+아웃라인 완성되면 논문 작성 시작
+related work 다른 사람들이 했던거를 contribution이라고 하면 안됨
+작성순서:  related work - intro - design - evaluation 순으로
+reference - 관련된 논문을 찾아서 링크 찾고 outline 업데이트
+
+4. sgx 적용 방법 생각
+드라이버 전체를 다 넣으면 좋겠지만 그러면 자바스크립트를 포팅하고 이상한 짓을 많이 해야하기 때문에
+포팅을 피하는 방향으로 생각
+
+

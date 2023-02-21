@@ -1,0 +1,85 @@
+간단하게 uuid만 보내는게 아니게 될수도 있다
+capability 문제를 다루지 않았다
+rquest를 날리는 주체가 본인이 아니고 application이 대리자가날린다
+did request를 날리는 사람도 원래 DID를 모르게 하는게 안전하지 않을까?
+얘가 ephID를 받은 상태에서 접근하게 하는게 의미가 있을 것 같다
+one-time or 6개월 이런식으로 resolver 내에서 쓰는걸 one-time이라고 본다면
+이건 진짜 ephemeral
+요 issue도 생각해보면 좋을 것 같고
+system적인 issue로 볼 수도 있고
+sgx를 쓰되 고민을 좀 하던가
+또한가지는 우리가 본것은 돈인데 우리가 갖는 것은 motivation이 되기 좀 부족하다싶다
+application, side-channel
+
+DID capability는 디자인을 가장 나중으로 미룹시다
+
+이미 어떤 부분은 고려가 되어있다
+그런데 분석결과 privacy에 대한 부분이 부족하더라
+query 를 oblivious 하게 처리하는 부분이 부족하더라
+
+우리가 찾은 공격 설명
+우리가 생각하기에 가장 시급한부분은 여기인 것 같고
+이렇게 구현을 했다
+
+그 다음으로 중요한거는
+SGX side-channel 오늘 발표한거 많이 참고하기
+
+여기서 해야될거는 지금 나온 SGX side-channel 공격 분석해서
+universal resolver에 대해 SGX 해서 할 수 있는게 뭔지 설계하고
+안전하게 설계해야겠죠?
+
+그 다음은 application이겠죠?
+이런 체계를 만들었을 때 실제 app 에서는 어떤 도움이 될 수 잇을지
+세가지 방향으로 정리를 해야할것같다
+
+docker-security는 어떻게 전개해야하나?
+security analysis에 들어갈 것같다
+해결책 제시 : kernel isolation
+
+어택모델은 universal resolver가 나쁜놈이다로 바뀌었다
+
+무슨 드라이버 설정할지
+
+개발환경을 만들어야하는데
+
+소스코드들이 깃에 다 올라와있고 그 소스코드를 이동해서 빌드된 다커 이미지들이
+다커허브에 올라와있는건데
+그냥 이미지 다운로드 받아서 돌리는건데
+그게 아니고 지금 다커 이미지를 로컬에서 빌드할 수가 있거든요
+다커.yml 이미지 지우고 build 키워드 넣어서 빌드하기
+
+로컬에서 이미지 만들도록 만들기!
+로컬의 dockerfile 만들고 우리가 변경한 local docker image가 실행되도록
+우리 자체 git에 올려서 다같이 build 환경으로 쓰면 될듯
+환경은 이지환 학생이 하시고
+
+허시원 학생은 security analysis를 하셔야겠죠? 실험 section에 넣지 않고
+캐시 실험한거를 security analysis에 넣어보면 될 것 같고
+forwarding하는건가요?
+이미 캐싱이 되어있는지도 파악해주시고
+그렇다면 우리 주장이 사실이 아니게 되네요
+캐시 실험을 정확히 조사를 해서 소브린에도 한번 해보고
+기존의 universal resolver에서 캐싱을 따로 하는지?
+security analysis 세션을 한번 정리를 해주시고
+실제 글을 한번 개괄식으로라도 써주시고 금요일까지 해주시고
+
+서한결학생은 아까 얘기했던 application쪽으로 연동되는 서비스가
+어떤게 있을 수 있고 이렇게 oblivious한 resolvingservice를 만들면
+그림이 어떻게 변하는지 시나리오를 정리해주시면 좋을 것 같습니다
+
+이 시나리오에서는 DID request를 보내는 대상이 UID를 아는 시나리오로 갑니다
+
+requester가 DID 아는 문제는 보류해놓고
+시나리오를 생각해도 되고
+기존의 거를 갖고와도 된다
+
+app이 그림안에 들어오면 또다른 보안 이슈가 보일 수도?
+글을 조금 써주시고
+
+그렇게 하고 금요일에
+
+SGX 부분은 저희가 시간도 없고 그런 관계로 용인호학생을 참여시켜서 담당하게 해야할 것 같네요
+한번에 머징하려면 시간이 걸리니까
+그때그때 얘기
+
+탈중앙화 시스템은 Controller, Requesting Party, Subject 세 개체로 구성되어 있습니다. Controller는 DID를 생성하며 DID에 대한 컨트롤을 맡습니다. Requesting Party는 DID Subject에 대해 신원증명을 "요청"하는 측입니다. Subject는 DID에 의해 그 신원이 증명되는 개체로, 개인 뿐만 아니라 단체나 어떤 기기가 될 수도 있습니다.  통상적으로 Subject는 Controller와 동일한 개체입니다.

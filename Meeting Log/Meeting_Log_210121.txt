@@ -1,0 +1,10 @@
+1. wolfSSL sgx 예제 분석해보기
+
+2. JNI interface를 통해 자바 코트에 c;/c++ shared library embedding 하는 과정 공부
+
+3. WolfSSL sgx에서 uni-resolver 들어가는 부분(아마도 client)를 shared library 형태로 compile(*.so 파일)
+
+4. JNI를 통해 Uni-resolver에 SGX
+
+
+캐시 해결법 - 랜덤 시간 딜레이

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>README.html</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+
+</head>
+
+<body>
+
+<h1 id="didsecurityanalysis">DID Security Analysis</h1>
+
+<figure>
+<img src="resources/DID-attack-model.png" alt="alt text" title="DID Attack Model" />
+<figcaption>alt text</figcaption>
+</figure>
+
+<h2 id="universalresolver">Universal Resolver</h2>
+
+<p>This is the way you can deploy universal Resolver on sslab.<br />
+access to sslab<br />
+$ virt-manager<br />
+run DID virtual machine (ID, PW same as sslab id)<br />
+$ git clone http://github.com/decentralized-identity/universal-resolver<br />
+$ cd universal-resolver<br />
+$ docker-compose -f docker-compose.yml pull<br />
+$ docker-compose -f docker-compose.yml up</p>
+
+<p>Send Key - Ctrl+Alt+F2 to turn virtual terminal<br />
+try to send DID request using curl; these are examples.<br />
+curl -X GET http://localhost:8080/1.0/identifiers/did:sov:WRfXPg8dantKVubE3HX8pw<br />
+curl -X GET http://localhost:8080/1.0/identifiers/did:v1:test:nym:z6Mkmpe2DyE4NsDiAb58d75hpi1BjqbH6wYMschUkjWDEEuR<br />
+curl -X GET http://localhost:8080/1.0/identifiers/did:key:z6Mkfriq1MqLBoPWecGoDLjguo1sB9brj6wT3qZ5BxkKpuP6<br />
+curl -X GET http://localhost:8080/1.0/identifiers/did:ethr:mainnet:0x3b0BC51Ab9De1e5B7B6E34E5b960285805C41736<br />
+curl -X GET http://localhost:8080/1.0/identifiers/did:ethr:0x02b97c30de767f084ce3080168ee293053ba33b235d7116a3263d29f1450936b71<br />
+curl -X GET http://localhost:8080/1.0/identifiers/did:nacl:Md8JiMIwsapml_FtQ2ngnGftNP5UmVCAUuhnLyAsPxI</p>
+
+<h2 id="didattackmodels">DID Attack Models</h2>
+
+<h3 id="sidechannelinformationleak">Side Channel Information leak</h3>
+
+<p>The combination of the lack of proper DID request authentication and DID document caching, may allow extraction of unintended information through side-channels. The current prototype of the universal resolver uses a rather simple caching scheme (e.g., the default caching package from Node.js). This means that cache miss and cache hit shows discernable time difference, and we could find it through sending request and analyze the time difference for multiple times. You can see it by running cache.py in the repository.</p>
+
+<p>Default DID resolver (&#8216;did-resolver&#8217;) uses a simple Map to enable the built in Cache for the DID Resolver object<br />
+For example,<br />
+const resolver = new DIDResolver({<br />
+ethr,<br />
+web<br />
+}, true).</p>
+
+<p>You can see how the &#8220;built in Cache&#8221; works in the code of &#8216;did-resolver&#8217; here:<br />
+https://github.com/decentralized-identity/did-resolver/blob/1631fa91cac0888c039c84a543855193081273e3/src/resolver.ts<br />
+It marks document &#8216;no-cache&#8217; as default, returns document immediately if cached and resolves newly if not.</p>
+
+<p>As you can see, there was no automatic TTL or other settings set that can mitigate side channel attacks.<br />
+I could easily find some services that uses did-resolver with default setting(cf. OpenAttestation, Notabene, Ceramic).<br />
+If those services are location-sensitive, the service could leak users' information or privacy.</p>
+
+<ul>
+<li>DIF says it is able to bring other caching packages (cf. js-cache), but it says they are <strong>not tested</strong>. (Also packages like &#8216;js-cache&#8217; does not even solve the timing attack problem)</li>
+<li>There were also some resolvers who do not use caching; cf. &#8216;ethr-did-resolver&#8217; based services or services with built-in-Cache turned-off.</li>
+<li>They had quite low resolving performance compared to the other methods; 2s per one request.</li>
+</ul>
+
+<p>Suggestion:<br />
+We suggest that the caching should be used not to reduce the retrieval time but only for the computing performance.<br />
+So the retrieval time should be random(in a certain range) or constant.</p>
+
+<h2 id="diduniversalresolverdriver">DID Universal Resolver Driver</h2>
+
+<h3 id="mechanismofuniversalresolverdriver">Mechanism of Universal Resolver Driver</h3>
+
+<p>Universal resolver driver is a intermediary between universal resolver and blockchain network. Each blockchain networks have different structures and API, universal resolver driver is needed for each kind of methods.
+Simply put, the main role of driver is verification request for received DID information. Javascript is used to make most of them, especially NodeJS (some of them use Java). In other words, these are worked on NodeJS. These drivers mainly use ExpressJS to communicate with universal resolver, which listen on designated port. Drivers accept this HTTP request with respect to URI which matches specific regular expression. After acception, driver extract DID id, method, and identifier. After that, send verification requests to corresponding blockchain.
+When drivers receive verification results from blockchain network, most of them receive results as a form of JSON. After receiving, most of them send back to requester, but some of them resolve JSON information on them and save it.</p>
+
+<p>(Flow chart will be updated soon&#8230;)</p>
+
+<h2 id="caching">Caching</h2>
+
+<ul>
+<li>DIF&#8217;s DID universal resolver is implemented with Maven (Java). <strong>We need to investigate further to check if there are any caching is used in this implementation</strong></li>
+<li>DIF&#8217;s javascript implementation of resolver (https://github.com/decentralized-identity/did-resolver) uses <code>js-cache</code> this can render the resolver vulnerable to cache timing attacks</li>
+<li>Achieving faster response time is not a top priority goal for resolvers. Hence, we can consider applying uniform response time caching or simply remove caching.</li>
+</ul>
+
+<h2 id="diddriverstructure">DID Driver structure</h2>
+
+<ul>
+<li>DID drivers can be added to the universal resolver by submitting pull requests to https://github.com/decentralized-identity/universal-resolver</li>
+<li>While an API (<code>Swagger API</code>) is provided for device driver development, there is no strict restriction on the implementation of the drivers. For instance, Soverign driver is written as a Java-based web service while uport is a pure javascript program.</li>
+<li>Each driver is required to run as a docker container that exposes a http daemon through port <code>8080</code></li>
+<li>The universal resolver invokes drivers by sending <code>HTTP GET</code> to the driver container</li>
+<li>Drivers are registered to the universal resolver in <code>config.json</code> and <code>docker-compose.yml</code> of UR</li>
+</ul>
+
+<h2 id="didmodelwithcapabilityandzk-snark">DID model with capability and zk-SNARK</h2>
+
+<h3 id="zk-snark">zk-SNARK</h3>
+
+<p>zk-SNARK(Zero-Knowledge Succinct Non-Interactive Argument of Knowledge)</p>
+
+<ul>
+<li> advanced zero-knowledge verification</li>
+<li> Using two functions</li>
+<li> prover put the private data and proving argument</li>
+<li> proving function returns proving output</li>
+<li> from proving output and verification argument verification function returns the verification output</li>
+</ul>
+
+<h3 id="new_structure1">New_structure 1</h3>
+
+<img src="./New_structure.PNG">
+
+<h3 id="new_structure2">New_structure 2</h3>
+
+<img src="./New_structure_2.PNG">
+
+<h3 id="issue">Issue</h3>
+
+<ul>
+<li>Confidentiality of request string</li>
+<li>DID request using protected request string</li>
+</ul>
+
+</body>
+</html>
